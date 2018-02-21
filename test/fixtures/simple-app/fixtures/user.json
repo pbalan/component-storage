@@ -1,0 +1,14 @@
+[
+  {
+    "id": "admin",
+  	"username": "admin",
+  	"email": "admin@theweflex.com",
+  	"password": "password"
+  },
+  {
+    "id": "generalUser",
+  	"username": "generalUser",
+  	"email": "generalUser@theweflex.com",
+  	"password": "password"
+  }
+]
