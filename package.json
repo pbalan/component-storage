@@ -1,6 +1,6 @@
 {
   "name": "component-storage",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "A custom loopback component to manage storage more secure way",
   "main": "./lib/",
   "dependencies": {

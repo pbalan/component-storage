@@ -27,4 +27,4 @@ See [LICENSE](https://github.com/pbalan/component-storage/blob/master/LICENSE)
 file.
 
 ### Todo
-- Tests are not working as expected when file uploads are required.
+- Tests for different configuration options.

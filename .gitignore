@@ -59,3 +59,9 @@ typings/
 
 # generated database file when running tests
 storage-db.json
+
+# Don't push uploaded image files to Git
+test/fixtures/simple-app/server/storage/product-images/*.jpeg
+test/fixtures/simple-app/server/storage/product-images/*.png
+test/fixtures/simple-app/server/storage/product-images/*.jpg
+test/fixtures/simple-app/server/storage/product-images/*.bmp

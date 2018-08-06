@@ -13,6 +13,8 @@ const generateAssert = (next) => {
   };
 };
 
+const uploadDir = path.join(SIMPLE_APP, 'server', 'storage', 'product-images');
+
 describe('Files', () => {
   describe('When user not in context', () => {
     it('Upload should return 401', (next) => {
@@ -20,7 +22,7 @@ describe('Files', () => {
       const file = fs.readFileSync(uploadFile);
       request(app)
         .post('/api/containers/product-images/upload')
-        .set('Content-Type', 'application/json')
+        .set('Content-Type', 'application/x-www-form-urlencoded')
         .send({
           file: file,
           container: 'product-images',
@@ -44,6 +46,25 @@ describe('Files', () => {
   describe('When user in context', () => {
     let token = null;
     beforeAll((next) => {
+      var rmdir = function(dir) {
+        var list = fs.readdirSync(dir);
+        for (var i = 0; i < list.length; i++) {
+          var filename = path.join(dir, list[i]);
+          var stat = fs.statSync(filename);
+
+          if (filename == '.' || filename == '..') {
+            // pass these files
+          } else if (stat.isDirectory()) {
+            // rmdir recursively
+            rmdir(filename);
+          } else {
+            // rm fiilename
+            fs.unlinkSync(filename);
+          }
+        }
+        fs.rmdirSync(dir);
+      };
+
       // app = require('../fixtures/simple-app/server/server')();
       request(app)
         .post('/api/users/login')
@@ -56,6 +77,7 @@ describe('Files', () => {
           expect(err).toBe(null);
           token = res.body.id;
           expect(res.body.userId).toEqual(2);
+          rmdir(uploadDir);
           next();
         });
     });
@@ -73,15 +95,19 @@ describe('Files', () => {
         .query({
           'access_token': token,
         })
-        .set('Content-Type', 'application/json')
+        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .attach('file', uploadFile)
         .send({
-          file: fs.readFileSync(uploadFile),
           container: 'product-images',
         })
         .expect(200, (err, res) => {
-          console.log(err);
-          console.log(res);
-          next();
+          let fileObj = res.body.result.files.file[0];
+          expect(fileObj.originalName, 'WechatIMG398.jpeg');
+          let dynamicName = path.basename(fileObj.name, '.jpeg');
+          fs.readdirSync(uploadDir, (err, files) => {
+            expect(files.length, 3);
+            next();
+          });
         });
       next();
     });
