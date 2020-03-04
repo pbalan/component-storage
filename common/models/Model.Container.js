@@ -54,7 +54,7 @@ module.exports = function(Model) {
 
         thumbnailSizes.forEach((thumbnail) => {
           let newFilename =
-            `${parseFile.name}_${thumbnail.width}px_${thumbnail.height}px${parseFile.ext}`; // eslint-disable-line
+            `${parseFile.name}${parseFile.ext}_${thumbnail.width}px_${thumbnail.height}px${parseFile.ext}`; // eslint-disable-line
 
           let newImage = sharp(path.join(directory, item.container, item.name))
             .resize(thumbnail.width, thumbnail.height);
