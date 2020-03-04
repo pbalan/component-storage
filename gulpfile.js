@@ -13,8 +13,9 @@ let srcs = gulp.src([
 ]);
 let all = gulp.src('test/spec/test-*.js');
 
-function setupEnvVars() {
+function setupEnvVars(done) {
   process.env.NODE_ENV = 'test';
+  done();
 }
 
 function buildCoverage() {
@@ -22,7 +23,7 @@ function buildCoverage() {
     .pipe(istanbul.hookRequire());
 }
 
-function runSpecs() {
+function runSpecs(done) {
   let spec;
   let toJasmine = jasmine({
     reporter: new SpecReporter({
@@ -45,6 +46,7 @@ function runSpecs() {
       }));
   }
   return spec.on('end', function() {
+    done();
     process.exit(0);
   }).on('error', function(err) {
     console.log(err);
@@ -52,9 +54,13 @@ function runSpecs() {
   });
 }
 
-gulp.task('setupEnvVars', setupEnvVars);
-gulp.task('build-coverage', buildCoverage);
-gulp.task('specs', ['build-coverage', 'setupEnvVars'], runSpecs);
+exports.setupEnvVars = setupEnvVars;
+exports.buildCoverage = buildCoverage;
+exports.runSpecs = runSpecs;
+
+let specs = gulp.series(setupEnvVars, buildCoverage, runSpecs);
+
+gulp.task('specs', specs);
 
 // handle errors
 gulp.on('error', function(err) {

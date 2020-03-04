@@ -8,7 +8,7 @@
     "name": "storage",
     "connector": "loopback-component-storage",
     "provider": "filesystem",
-    "root": "./test/fixtures/simple-app/server/storage",
+    "root": "../../test/fixtures/simple-app/server/storage",
     "maxFileSize": "52428800",
     "nameConflict": "makeUnique"
   }
