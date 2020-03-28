@@ -44,37 +44,37 @@ module.exports = function(Model) {
       }
       var files = ctx.result.result.files.file;
       let stream = null;
-      let uploadedFiles = [];
 
-      files.forEach((item) => {
+      let uploadedFiles = files.map((item, i) => {
         let url = CONTAINERS_URL + item.container + '/download/' + item.name; // eslint-disable-line
         stream = Model.downloadStream(item.container, item.name);
         let thumbnailSizes = storageConfig.thumbnails;
         let parseFile = path.parse(item.name);
 
-        thumbnailSizes.forEach((thumbnail) => {
-          let newFilename =
-            `${parseFile.name}${parseFile.ext}_${thumbnail.width}px_${thumbnail.height}px${parseFile.ext}`; // eslint-disable-line
+        if (item.type.startsWith('image')) {
+          thumbnailSizes.forEach((thumbnail) => {
+            let newFilename =
+              `${parseFile.name}${parseFile.ext}_${thumbnail.width}px_${thumbnail.height}px${parseFile.ext}`; // eslint-disable-line
 
-          let newImage = sharp(path.join(directory, item.container, item.name))
-            .resize(thumbnail.width, thumbnail.height);
-          if (false === storageConfig.keepAspectRatio) {
-            newImage.ignoreAspectRatio();
-          } else {
-            newImage.max();
-          }
-          // default to center as provided by sharp
-          // else top-left
-          if (false === storageConfig.cropCenter) {
-            newImage.crop(sharp.gravity.northeast);
-          }
-          newImage
-            .toFormat('png')
-            .toFile(path.join(directory, item.container, newFilename));
-        });
-
+            let newImage = sharp(path.join(directory, item.container, item.name))
+              .resize(thumbnail.width, thumbnail.height);
+            if (false === storageConfig.keepAspectRatio) {
+              newImage.ignoreAspectRatio();
+            } else {
+              newImage.max();
+            }
+            // default to center as provided by sharp
+            // else top-left
+            if (false === storageConfig.cropCenter) {
+              newImage.crop(sharp.gravity.northeast);
+            }
+            newImage
+              .toFormat('png')
+              .toFile(path.join(directory, item.container, newFilename));
+          });
+        }
         // store reference in files model
-        app.models.files.create({
+        return app.models.files.create({
           name: item.name,
           originalName: item.name,
           type: item.type,
@@ -82,14 +82,6 @@ module.exports = function(Model) {
           url: url,
           createdAt: Date.now(),
           createdBy: userId,
-        }, (err, instance) => {
-          if (err !== null) {
-            console.log(err);
-            throw err;
-          } else {
-            uploadedFiles.push(instance);
-            ctx.result = uploadedFiles;
-          }
         });
         stream.on('error', next);
       });
@@ -97,7 +89,11 @@ module.exports = function(Model) {
         // try resizing the file as per the thumbnail configuration
         // sharp(stream)
       });
-      next();
+      Promise.all(uploadedFiles).then(response => {
+        ctx.result.result.files = response;
+
+        next();
+      }).catch(err => {console.log(err)});
     }); // works
   });
 };
