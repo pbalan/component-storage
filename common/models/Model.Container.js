@@ -56,13 +56,13 @@ module.exports = function(Model) {
             let newFilename =
               `${parseFile.name}${parseFile.ext}_${thumbnail.width}px_${thumbnail.height}px${parseFile.ext}`; // eslint-disable-line
 
-            let newImage = sharp(path.join(directory, item.container, item.name))
-              .resize(thumbnail.width, thumbnail.height);
-            if (false === storageConfig.keepAspectRatio) {
-              newImage.ignoreAspectRatio();
-            } else {
-              newImage.max();
+            let options = {
+              fit: false === storageConfig.keepAspectRatio ? 'fill': 'cover',
+              
             }
+            let newImage = sharp(path.join(directory, item.container, item.name))
+              .resize(thumbnail.width, thumbnail.height, options);
+            
             // default to center as provided by sharp
             // else top-left
             if (false === storageConfig.cropCenter) {
